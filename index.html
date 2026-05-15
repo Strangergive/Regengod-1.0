@@ -1,93 +1,126 @@
-<section id="main-content">
-    <div style="margin-bottom: 40px;">
-        <h2 style="font-size: 2.5rem; letter-spacing: 2px;">DASHBOARD</h2>
-        <p style="color: #444;">ยินดีต้อนรับสู่ Regengod</p>
-    </div>
-
-    <div class="grid-layout">
-        
-        <div class="card">
-            <div class="card-title">ข่าวสารและอัปเดต</div>
-            <div class="news-box">
-                <div class="news-date">15 MAY 2026</div>
-                <div class="news-text">อัปเดตระบบแสดงผลผู้เล่นออนไลน์ Real-time</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Launcher Regengod</div>
-            <div class="status-row">
-                <span class="status-label">สถานะระบบ:</span>
-                <div class="status-indicator">
-                    <div id="status-dot" class="dot"></div> 
-                    <span id="launcher-status">กำลังตรวจสอบ...</span>
-                </div>
-            </div>
-            <div class="status-row">
-                <span class="status-label">สมาชิกออนไลน์ (Discord):</span>
-                <div class="status-indicator">
-                    <span id="player-count">0</span> คน
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">DISCORD</div>
-            <iframe src="https://discord.com/widget?id=1504818352403648624&theme=dark" width="100%" height="300" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
-            <a href="https://discord.gg/TJAbr58SKW" target="_blank" class="btn-discord">เข้าสู่ DISCORD ชุมชน</a>
-        </div>
-
-        <div class="card download-area">
-            <h2 style="margin-bottom: 10px;">พร้อมเล่นหรือยัง?</h2>
-            <p style="color: #666; margin-bottom: 30px;">ดาวน์โหลดตัวเข้าเกมเวอร์ชันล่าสุดเพื่อเริ่มการผจญภัย</p>
-            <a href="update.zip" class="btn-download">DOWNLOAD LAUNCHER</a>
-            <p style="margin-top: 20px; font-size: 0.8rem; color: #333;">REGENGOD LAUNCHER V1.0.0</p>
-        </div>
-
-    </div>
-</section>
-
-<script>
-    // ID ดิสคอร์ดที่คุณแจ้งมา
-    const DISCORD_ID = '1504818352403648624'; 
-
-    async function updateLauncherStatus() {
-        const statusText = document.getElementById('launcher-status');
-        const statusDot = document.getElementById('status-dot');
-        const playerCount = document.getElementById('player-count');
-
-        try {
-            // ดึงข้อมูลจาก Discord Widget API
-            const response = await fetch(`https://discord.com/api/guilds/${DISCORD_ID}/widget.json`);
-            if (!response.ok) throw new Error('API Disabled or Error');
-            
-            const data = await response.json();
-            
-            // แสดงสถานะ ONLINE
-            statusText.innerText = "ONLINE";
-            statusText.style.color = "#00ff64";
-            statusDot.className = "dot online-dot"; // ใช้ class สีเขียวเดิมที่มีใน CSS
-            
-            if (data.presence_count !== undefined) {
-                playerCount.innerText = data.presence_count;
-            }
-        } catch (error) {
-            // แสดงสถานะ OFFLINE เมื่อเชื่อมต่อไม่ได้
-            statusText.innerText = "OFFLINE";
-            statusText.style.color = "#ff4444";
-            statusDot.className = "dot"; 
-            statusDot.style.background = "#ff4444";
-            statusDot.style.boxShadow = "0 0 10px #ff4444";
-            playerCount.innerText = "-";
-            console.error("Discord Widget error:", error);
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REGENGOD Launcher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --card: rgba(20, 20, 20, 0.7);
+            --border: rgba(255, 255, 255, 0.05);
+            --accent: #ffffff;
         }
-    }
 
-    // ทำงานทันทีและอัปเดตทุกๆ 30 วินาที
-    updateLauncherStatus();
-    setInterval(updateLauncherStatus, 30000);
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
+        body { background-color: var(--bg); color: white; overflow-x: hidden; }
 
-    function startApp() {
-        document.body.classList.add('active-site');
-    }
-</script>
+        /* --- หน้าแรก (Landing) --- */
+        #landing {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: 1.2s cubic-bezier(0.85, 0, 0.15, 1);
+            position: fixed; width: 100%; z-index: 100; background: var(--bg);
+        }
+        .hero-name { font-size: 5rem; font-weight: 900; letter-spacing: 15px; margin-bottom: 30px; text-transform: uppercase; }
+        .btn-enter { padding: 15px 60px; border: 1px solid var(--border); background: transparent; color: white; cursor: pointer; border-radius: 50px; font-size: 1.1rem; transition: 0.4s; letter-spacing: 2px; }
+        .btn-enter:hover { background: white; color: black; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+
+        /* --- หน้าหลัก (Dashboard) --- */
+        #main-content {
+            padding: 80px 5%; max-width: 1300px; margin: 0 auto;
+            opacity: 0; transform: scale(0.95); transition: 1s ease-out;
+        }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr 350px; gap: 25px; }
+
+        .card { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 30px; 
+            backdrop-filter: blur(10px); height: 100%;
+        }
+        .card-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .card-title::before { content: ''; width: 4px; height: 20px; background: white; border-radius: 10px; }
+
+        .news-box { margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px; border-left: 2px solid rgba(255,255,255,0.1); }
+        .news-date { font-size: 0.8rem; color: #555; }
+        .news-text { margin-top: 5px; font-weight: 300; font-size: 0.95rem; }
+
+        .status-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.02); }
+        .status-label { font-weight: 900; font-size: 1.1rem; letter-spacing: 1px; }
+        .status-indicator { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: bold; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; transition: 0.3s; }
+        .online-dot { background: #00ff64; box-shadow: 0 0 10px #00ff64; }
+
+        .download-area { grid-column: 1 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px; }
+        .btn-download { background: white; color: black; padding: 20px 60px; border-radius: 15px; font-weight: 900; text-decoration: none; font-size: 1.4rem; transition: 0.3s; }
+        .btn-download:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
+
+        .btn-discord { 
+            display: block; width: 100%; text-align: center; background: #5865F2; color: white; 
+            padding: 12px; border-radius: 12px; text-decoration: none; margin-top: 15px; font-weight: bold;
+            transition: 0.3s; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-discord:hover { background: #4752c4; transform: scale(1.02); }
+
+        .active-site #landing { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        .active-site #main-content { opacity: 1; transform: scale(1); }
+
+        @media (max-width: 1100px) { .grid-layout { grid-template-columns: 1fr; } .download-area { grid-column: auto; } }
+    </style>
+</head>
+<body>
+
+    <section id="landing">
+        <h1 class="hero-name">REGENGOD</h1>
+        <button class="btn-enter" onclick="startApp()">ENTER SYSTEM</button>
+    </section>
+
+    <section id="main-content">
+        <div style="margin-bottom: 40px;">
+            <h2 style="font-size: 2.5rem; letter-spacing: 2px;">DASHBOARD</h2>
+            <p style="color: #444;">ยินดีต้อนรับสู่ REGENGOD</p>
+        </div>
+
+        <div class="grid-layout">
+            
+            <div class="card">
+                <div class="card-title">ข่าวสารและอัปเดต</div>
+                <div class="news-box">
+                    <div class="news-date">15 MAY 2026</div>
+                    <div class="news-text">อัปเดตระบบ Server ID และการแสดงผลหน้าเว็บให้เรียบร้อยแล้ว</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Launcher Regengod</div>
+                <div class="status-row">
+                    <span class="status-label">REGENGOD</span>
+                    <div class="status-indicator">
+                        <div id="status-dot" class="dot online-dot"></div> 
+                        <span id="launcher-status" style="color: #00ff64;">ONLINE</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">DISCORD</div>
+                <iframe src="https://discord.com/widget?id=1504818352403648624&theme=dark" width="100%" height="350" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+                <a href="https://discord.gg/AgCmrkZupF" target="_blank" class="btn-discord">เข้าสู่ DISCORD ชุมชน</a>
+            </div>
+
+            <div class="card download-area">
+                <h2 style="margin-bottom: 10px;">พร้อมเล่นหรือยัง?</h2>
+                <p style="color: #666; margin-bottom: 30px;">ดาวน์โหลดตัวเข้าเกมเวอร์ชันล่าสุดเพื่อเริ่มการผจญภัย</p>
+                <a href="update.zip" class="btn-download">DOWNLOAD LAUNCHER</a>
+                <p style="margin-top: 20px; font-size: 0.8rem; color: #333;">REGENGOD LAUNCHER V1.0.0</p>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        function startApp() {
+            document.body.classList.add('active-site');
+        }
+    </script>
+</body>
+</html>
