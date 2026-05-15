@@ -17,14 +17,14 @@
         <div class="card">
             <div class="card-title">Launcher Regengod</div>
             <div class="status-row">
-                <span class="status-label">สถานะการเชื่อมต่อ:</span>
+                <span class="status-label">สถานะระบบ:</span>
                 <div class="status-indicator">
                     <div id="status-dot" class="dot"></div> 
                     <span id="launcher-status">กำลังตรวจสอบ...</span>
                 </div>
             </div>
             <div class="status-row">
-                <span class="status-label">คนในดิสคอร์ด:</span>
+                <span class="status-label">สมาชิกออนไลน์ (Discord):</span>
                 <div class="status-indicator">
                     <span id="player-count">0</span> คน
                 </div>
@@ -48,7 +48,7 @@
 </section>
 
 <script>
-    // ใช้ ID ใหม่ที่คุณให้มา
+    // ID ดิสคอร์ดที่คุณแจ้งมา
     const DISCORD_ID = '1504818352403648624'; 
 
     async function updateLauncherStatus() {
@@ -57,32 +57,35 @@
         const playerCount = document.getElementById('player-count');
 
         try {
+            // ดึงข้อมูลจาก Discord Widget API
             const response = await fetch(`https://discord.com/api/guilds/${DISCORD_ID}/widget.json`);
-            if (!response.ok) throw new Error('Offline');
+            if (!response.ok) throw new Error('API Disabled or Error');
             
             const data = await response.json();
             
-            // ถ้าดึงข้อมูลได้ = Online
+            // แสดงสถานะ ONLINE
             statusText.innerText = "ONLINE";
             statusText.style.color = "#00ff64";
-            statusDot.className = "dot online-dot";
+            statusDot.className = "dot online-dot"; // ใช้ class สีเขียวเดิมที่มีใน CSS
             
             if (data.presence_count !== undefined) {
                 playerCount.innerText = data.presence_count;
             }
         } catch (error) {
-            // ถ้าดึงไม่ได้หรือเกิด Error = Offline
+            // แสดงสถานะ OFFLINE เมื่อเชื่อมต่อไม่ได้
             statusText.innerText = "OFFLINE";
             statusText.style.color = "#ff4444";
-            statusDot.className = "dot";
+            statusDot.className = "dot"; 
             statusDot.style.background = "#ff4444";
             statusDot.style.boxShadow = "0 0 10px #ff4444";
             playerCount.innerText = "-";
+            console.error("Discord Widget error:", error);
         }
     }
 
+    // ทำงานทันทีและอัปเดตทุกๆ 30 วินาที
     updateLauncherStatus();
-    setInterval(updateLauncherStatus, 30000); // อัปเดตทุก 30 วินาที
+    setInterval(updateLauncherStatus, 30000);
 
     function startApp() {
         document.body.classList.add('active-site');
